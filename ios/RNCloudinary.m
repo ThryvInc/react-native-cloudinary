@@ -37,6 +37,18 @@ RCT_EXPORT_MODULE();
   return dispatch_get_main_queue();
 }
 
+- (NSArray<NSString *> *)supportedEvents {
+  return @[@"uploadProgress"];
+}
+
+- (void)startObserving {
+    self.hasListeners = YES;
+}
+
+// Will be called when this module's last listener is removed, or on dealloc.
+- (void)stopObserving {
+    self.hasListeners = NO;
+}
 
 RCT_EXPORT_METHOD(config:(NSString *)cloudName aPIKey:(NSString *)apiKey apiSecret:(NSString *)apiSecret presetName:(NSString*)presetName) {
   NSString *cloudinaryUrl = [NSString stringWithFormat:@"cloudinary://%@:%@@%@", apiKey, apiSecret, cloudName];
@@ -61,7 +73,9 @@ RCT_EXPORT_METHOD(uploadImage:(NSString *)path resolver:(RCTPromiseResolveBlock)
   
     if (self.cloudinary) {
         [[self.cloudinary createUploader] uploadWithData:data uploadPreset:self.presetName params:NULL progress:^(NSProgress * progress) {
-            
+          if (self.hasListeners) {
+            [self sendEventWithName:@"uploadProgress" body:@{@"completed": progress.fileCompletedCount, @"total": progress.fileTotalCount}];
+          }
         } completionHandler:^(CLDUploadResult * result, NSError * error) {
             if (error) {
                 NSString *code = @"Cloudinary error";

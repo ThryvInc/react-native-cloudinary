@@ -91,7 +91,18 @@ public class RNCloudinaryModule extends ReactContextBaseJavaModule {
 
       Uri myFileUri = Uri.parse(path);
       InputStream inputStream = this.reactContext.getContentResolver().openInputStream(myFileUri);
-      Map uploadResult = this.mCloudinary.uploader().unsignedUpload(inputStream, this.mPresetName, this.mConfig);
+      Map uploadResult = this.mCloudinary.uploader().unsignedUpload(inputStream, this.mPresetName, this.mConfig, new ProgressCallback() {
+        public void onProgress(long bytesUploaded, long totalBytes) {
+          if (reactContext != null) {
+            WritableMap writableMap = Arguments.createMap();
+            writableMap.putLong("completed", bytesUploaded);
+            writableMap.putLong("total", totalBytes);
+            reactContext
+              .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+              .emit("uploadProgress", writableMap);
+          }
+        }
+      });
       WritableMap res = RNCloudinaryModule.toWritableMap(uploadResult);
       _promise.resolve(res);
       _this.isResolved = true;
