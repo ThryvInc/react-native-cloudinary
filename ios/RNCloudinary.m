@@ -74,7 +74,7 @@ RCT_EXPORT_METHOD(uploadImage:(NSString *)path resolver:(RCTPromiseResolveBlock)
     if (self.cloudinary) {
         [[self.cloudinary createUploader] uploadWithData:data uploadPreset:self.presetName params:NULL progress:^(NSProgress * progress) {
           if (self.hasListeners) {
-            [self sendEventWithName:@"uploadProgress" body:@{@"completed": progress.fileCompletedCount, @"total": progress.fileTotalCount}];
+            [self sendEventWithName:@"uploadProgress" body:@{@"completed": [NSNumber numberWithLongLong:progress.completedUnitCount], @"total": [NSNumber numberWithLongLong:progress.totalUnitCount]}];
           }
         } completionHandler:^(CLDUploadResult * result, NSError * error) {
             if (error) {
