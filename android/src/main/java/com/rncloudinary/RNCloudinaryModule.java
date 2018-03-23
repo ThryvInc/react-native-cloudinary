@@ -12,6 +12,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import com.cloudinary.Cloudinary;
 
@@ -95,8 +96,8 @@ public class RNCloudinaryModule extends ReactContextBaseJavaModule {
         public void onProgress(long bytesUploaded, long totalBytes) {
           if (reactContext != null) {
             WritableMap writableMap = Arguments.createMap();
-            writableMap.putLong("completed", bytesUploaded);
-            writableMap.putLong("total", totalBytes);
+            writableMap.putDouble("completed", bytesUploaded);
+            writableMap.putDouble("total", totalBytes);
             reactContext
               .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
               .emit("uploadProgress", writableMap);
